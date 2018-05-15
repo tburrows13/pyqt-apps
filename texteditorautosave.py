@@ -3,7 +3,7 @@ A text editor that autosaves when 5 changes have been made to the text
 """
 
 import sys
-from PySide2.QtWidgets import (QLineEdit, QPushButton, QApplication, QDialog,
+from PyQt5.QtWidgets import (QLineEdit, QPushButton, QApplication, QDialog,
 							QLabel, QTextEdit, QVBoxLayout, QHBoxLayout, QWidget)
 
 

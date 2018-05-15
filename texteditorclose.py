@@ -55,12 +55,11 @@ class Editor(QWidget):
 		# Create widgets
 		self.setWindowTitle("Tom's Text Editor")
 
-		self.namelabel = QLabel("Filename:")
+		self.name_label = QLabel("Filename:")
 		self.filename = QLineEdit("")
 		self.load = QPushButton("Load")
 		self.text = QTextEdit()
 		self.save = QPushButton("Save")
-
 
 		# Create layout and add widgets
 		self.layout = QVBoxLayout()
@@ -68,12 +67,10 @@ class Editor(QWidget):
 		self.sublayout.addWidget(self.filename)
 		self.sublayout.addWidget(self.load)
 
-		self.layout.addWidget(self.namelabel)
+		self.layout.addWidget(self.name_label)
 		self.layout.addLayout(self.sublayout)
 		self.layout.addWidget(self.text)
 		self.layout.addWidget(self.save)
-
-
 
 		# Set dialog layout
 		self.setLayout(self.layout)
@@ -107,7 +104,6 @@ class Editor(QWidget):
 			self.close_widget_open = True
 		else:
 			event.accept()
-
 
 
 if __name__ == '__main__':
