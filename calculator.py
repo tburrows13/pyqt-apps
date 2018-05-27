@@ -1,11 +1,5 @@
 """
 Calculator
-
-[Display]
-789DA
-456x%
-123+-
-00.==
 """
 
 import sys
