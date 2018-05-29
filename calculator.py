@@ -4,11 +4,10 @@ Calculator
 
 import sys
 import re
-from PyQt5.QtWidgets import QLineEdit, QPushButton, QApplication, QDialog, \
-	QLabel, QTextEdit, QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QFrame, \
-	QGroupBox
+from PyQt5.QtWidgets import QPushButton, QApplication, QLabel, QVBoxLayout, \
+	QWidget, QGridLayout, QGroupBox
 from PyQt5.QtGui import QFont
-from PyQt5.Qt import Qt
+from PyQt5.QtCore import Qt
 
 LINES_TO_SHOW = 4
 
@@ -20,7 +19,6 @@ class Window(QWidget):
 		self.setWindowTitle("Calculator")
 
 		self.display = QGroupBox(self)
-
 		self.inside_display = QVBoxLayout()
 
 		self.display_font = QFont("Menlo", 16)
@@ -45,7 +43,7 @@ class Window(QWidget):
 		self.add_button("DEL", 0, 3)
 		self.add_button("AC", 0, 4)
 		self.add_button("x", 1, 3)
-		self.add_button("/", 1, 4)
+		self.add_button("÷", 1, 4)
 		self.add_button("+", 2, 3)
 		self.add_button("-", 2, 4)
 		self.add_button("0", 3, 0)
@@ -59,10 +57,13 @@ class Window(QWidget):
 		self.layout.addLayout(self.grid_layout)
 
 		self.setLayout(self.layout)
+		self.setFixedSize(self.sizeHint())
+
 
 		self.previous_result = None
 		self.previous_expressions = []
 		self.current_expression = 0
+		self.saved_expression = ""
 
 	def add_button(self, button_str, x, y, clicked_str=None):
 		if clicked_str is None:
@@ -84,7 +85,8 @@ class Window(QWidget):
 		self.inside_display.addWidget(line)
 
 	def button_pressed(self, key_str):
-		if key_str in ("x", "/", "+", "-") and len(self.lines[-1].text()) == 0:			# We need check if this is the first key pressed.
+		if key_str in ("x", "÷", "+", "-") and len(self.lines[-1].text()) == 0:
+			# We need check if this is the first key pressed.
 			# If it is, add ANS to the beginning
 			self.button_pressed("ANS")
 		if key_str == "DEL":
@@ -113,21 +115,32 @@ class Window(QWidget):
 	def equals_pressed(self):
 		to_eval = self.lines[-1].text()
 		self.previous_expressions.append(to_eval)
-		to_eval = to_eval\
-			.replace("x", "*")\
-			.replace("ANS", str(self.previous_result))
+		to_eval = to_eval.replace("x", "*").replace("÷", "/")
 
 		try:
 			if "()" in to_eval or re.match(".*[^+\-*/]\(.*", to_eval):
 				# Checks if there is a non operator before the opening brackets
 				# This avoids it trying to call an int as a function in eval
 				raise SyntaxError
+
+			if re.match(".*[^+\-*/]ANS[^+\-*/].*", to_eval):
+				# Checks if there is a non operator before or after the the ANS
+				raise SyntaxError
+
+			to_eval = to_eval.replace("ANS", str(self.previous_result))
 			result = eval(to_eval)
 		except SyntaxError:
 			result = "SYNTAX ERROR"
 		else:
+			# If it passes
 			self.previous_result = result
+
+			# Convert from 5.0 to 5
+			if int(result) == result and isinstance(result, float):
+				result = int(result)
+
 			result = "=" + str(result)
+
 		self.add_line(result)
 		self.add_line()
 
@@ -150,7 +163,7 @@ class Window(QWidget):
 			self.current_expression -= 1
 		else:
 			if self.current_expression + 1 > 0:
-				# We have returned gone above value
+				# We have returned to the original value
 				return
 			self.current_expression += 1
 		if self.current_expression == 0:
@@ -162,11 +175,13 @@ class Window(QWidget):
 
 	def keyPressEvent(self, QKeyEvent):
 		text, key = QKeyEvent.text().lower(), QKeyEvent.key()
-		if text in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "x", "/",
+		if text in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "x", "÷",
 					"+", "-", "(", ")", ".", "="):
 			self.button_pressed(text)
 		elif text == "*":
 			self.button_pressed("x")
+		elif text == "/":
+			self.button_pressed("÷")
 		elif text == "a":
 			self.button_pressed("ANS")
 		elif key == 16777219:  # DEL
