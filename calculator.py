@@ -86,7 +86,7 @@ class Window(QWidget):
 
 	def button_pressed(self, key_str):
 		if key_str in ("x", "÷", "+", "-") and len(self.lines[-1].text()) == 0:
-			# We need check if this is the first key pressed.
+			# Check if this is the first key of the line pressed.
 			# If it is, add ANS to the beginning
 			self.button_pressed("ANS")
 		if key_str == "DEL":
@@ -118,19 +118,26 @@ class Window(QWidget):
 		to_eval = to_eval.replace("x", "*").replace("÷", "/")
 
 		try:
-			if "()" in to_eval or re.match(".*[^+\-*/]\(.*", to_eval):
+			if "()" in to_eval or re.match(".*[^+\-*/(]\(.*", to_eval):
 				# Checks if there is a non operator before the opening brackets
 				# This avoids it trying to call an int as a function in eval
 				raise SyntaxError
 
-			if re.match(".*[^+\-*/]ANS[^+\-*/].*", to_eval):
+			if re.match(".*[^+\-*/(]ANS.*", to_eval) or \
+				re.match(".*ANS[^+\-*/)].*", to_eval):
 				# Checks if there is a non operator before or after the the ANS
 				raise SyntaxError
 
 			to_eval = to_eval.replace("ANS", str(self.previous_result))
 			result = eval(to_eval)
+
+			if result >= 10**13:
+				raise ValueError
+
 		except SyntaxError:
 			result = "SYNTAX ERROR"
+		except (ValueError, ZeroDivisionError):
+			result = "MATH ERROR"
 		else:
 			# If it passes
 			self.previous_result = result
