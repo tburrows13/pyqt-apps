@@ -195,9 +195,9 @@ class Window(QWidget):
 			self.button_pressed("DEL")
 		elif key == 16777220:  # Enter
 			self.button_pressed("=")
-		elif key == 16777235:  # Up
+		elif key in (16777235, 16777238):  # Up  or Page Up
 			self.load_expression(up=True)
-		elif key == 16777237:  # Down
+		elif key in (16777237, 16777239):  # Down  or Page Down
 			self.load_expression(up=False)
 		elif key == 16777216:  # Escape
 			app.quit()
